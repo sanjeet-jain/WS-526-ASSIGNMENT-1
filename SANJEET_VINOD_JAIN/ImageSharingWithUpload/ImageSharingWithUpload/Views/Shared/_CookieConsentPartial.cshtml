@@ -9,18 +9,15 @@
 @if (showBanner)
 {
     <nav id="cookieConsent" class="navbar navbar-default navbar-fixed-bottom" role="alert">
-        <div class="container">
-            <div class="navbar-header">
-                <span class="navbar-brand"><span class="glyphicon glyphicon-info-sign" style="color:green" aria-hidden="true"></span></span>
-            </div>
-            <div class="collapse navbar-collapse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse ">
                 <p class="navbar-text">
+
+                    <span class="glyphicon glyphicon-info-sign" style="color:green" aria-hidden="true"></span>
                     We use necessary cookies to make our site work. We’d like to set additional cookies to understand site usage, make site improvements and to remember your settings.
-                </p>
-                <div class="navbar-right">
                     <a asp-controller="Home" asp-action="Privacy" class="btn btn-info navbar-btn">Learn More</a>
-                    <button type="button" class="btn btn-default navbar-btn" data-cookie-string="@cookieString">Accept</button>
-                </div>
+                    <button type="button" class="btn btn-success navbar-btn" data-cookie-string="@cookieString">Accept</button>
+                </p>
             </div>
         </div>
     </nav>
