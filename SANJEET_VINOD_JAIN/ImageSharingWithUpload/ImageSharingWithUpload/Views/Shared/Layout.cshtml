@@ -33,33 +33,35 @@
 
 <body class="twoColumnHdrFtr">
     <div id="container">
-        <header id="header">
-            <h1><img alt="[Jive Talkin' Choirboy]" src="~/images/jive-talkin-choirboy.png" /></h1>
-        </header>
 
-        <nav id="nav">
-            <ul>
-                <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
-                <li><a asp-area="" asp-controller="Images" asp-action="Upload">Upload</a></li>
-                <li><a asp-area="" asp-controller="Images" asp-action="Query">Query</a></li>
-            </ul>
-        </nav>
+            <header id="header">
+                <h1><img alt="[Jive Talkin' Choirboy]" src="~/images/jive-talkin-choirboy.png" /></h1>
+            </header>
 
-        <aside id="sidebar">
-            <h1>Links</h1>
-            <p><a href="http://www.dominicduggan.org">My home page</a></p>
-            <p><a href="http://www.stevens.edu">Stevens home page</a></p>
-        </aside>
+            <nav id="nav">
+                <ul>
+                    <li><a asp-area="" asp-controller="Account" asp-action="Register">Register</a></li>
+                    <li><a asp-area="" asp-controller="Images" asp-action="Upload">Upload</a></li>
+                    <li><a asp-area="" asp-controller="Images" asp-action="Query">Query</a></li>
+                </ul>
+            </nav>
 
-        <partial name="_CookieConsentPartial" />
+            <aside id="sidebar">
+                <h1>Links</h1>
+                <p><a href="http://www.dominicduggan.org">My home page</a></p>
+                <p><a href="http://www.stevens.edu">Stevens home page</a></p>
+            </aside>
 
-        <article id="content">
-            @RenderBody()
-        </article>
-        <footer id="footer">
-            <p>&copy; @DateTime.Now.Year Your Name Here</p>
-        </footer>
+            <partial name="_CookieConsentPartial" />
+
+            <article id="content">
+                @RenderBody()
+            </article>
     </div>
+            <footer id="footer"  class="fixed-bottom bg-white">
+                <p c> &copy; @DateTime.Now.Year Sanjeet Vinod Jain</p>
+            </footer>
+
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
