@@ -398,4 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 #runtime folders
-wwwroot/data/*
+**/wwwroot/data/
