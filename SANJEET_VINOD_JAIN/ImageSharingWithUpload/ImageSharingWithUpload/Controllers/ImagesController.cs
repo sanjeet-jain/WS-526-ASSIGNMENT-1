@@ -4,18 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 using System.IO;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
-
 using ImageSharingWithUpload.Models;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 // TODO add annotations for HTTP actions
 
 namespace ImageSharingWithUpload.Controllers
 {
+    using SysIOFile = System.IO.File;
     public class ImagesController : Controller
     {
         private readonly IWebHostEnvironment hostingEnvironment;
@@ -55,8 +55,9 @@ namespace ImageSharingWithUpload.Controllers
         {
             return Path.Combine(
                hostingEnvironment.WebRootPath,
-               "data", "info", id + ".js");
+               "data", "info", id + ".json");
         }
+
 
         protected void CheckAda()
         {
@@ -73,7 +74,8 @@ namespace ImageSharingWithUpload.Controllers
         }
 
 
-       // TODO
+        // TODO
+        [HttpGet]
         public IActionResult Upload()
         {
             CheckAda();
@@ -81,7 +83,8 @@ namespace ImageSharingWithUpload.Controllers
             return View();
         }
 
-       // TODO
+        // TODO
+        [HttpPost]
         public async Task<IActionResult> Upload(Image image,
                                     IFormFile imageFile)
         {
@@ -105,10 +108,23 @@ namespace ImageSharingWithUpload.Controllers
                 {
                     mkDirectories();
 
-                    var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+                    String fileName = image.Id;
 
                     // TODO save image and metadata
-
+                    if (imageFile.ContentType != "image/jpeg")
+                    {
+                        // Error on content type; but can be faked!
+                    }
+                    else
+                    {
+                        using (FileStream DestinationStream = SysIOFile.Create(imageDataFile(image.Id)))
+                        {
+                            await imageFile.CopyToAsync(DestinationStream);
+                        }
+                        var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+                        String jsonData = JsonSerializer.Serialize(image, jsonOptions);
+                        await SysIOFile.WriteAllTextAsync(imageInfoFile(fileName), jsonData);
+                    }
 
                     return View("Details", image);
                 }
@@ -126,7 +142,7 @@ namespace ImageSharingWithUpload.Controllers
             }
         }
 
-       // TODO
+        // TODO
         public IActionResult Query()
         {
             CheckAda();
@@ -134,7 +150,7 @@ namespace ImageSharingWithUpload.Controllers
             return View();
         }
 
-       // TODO
+        // TODO
         public async Task<IActionResult> Details(Image image)
         {
             CheckAda();
