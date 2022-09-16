@@ -34,9 +34,9 @@ namespace ImageSharingWithUpload.Controllers
         {
             CheckAda();
             var options = new CookieOptions() { IsEssential = true, Secure = true, SameSite = SameSiteMode.None, Expires = DateTime.Now.AddMonths(3)  };
-            // TODO add cookies for "Userid" and "ADA"
+            // TODO add cookies for "Userid" and "ADA" -DONE
             var adaFLag = (ADA == "on" ? true : false);
-            Response.Cookies.Append("userid", Userid, options);
+            Response.Cookies.Append("UserId", Userid, options);
             Response.Cookies.Append("ADA", adaFLag.ToString(), options);
             ViewBag.isADA = adaFLag;
             // End TODO

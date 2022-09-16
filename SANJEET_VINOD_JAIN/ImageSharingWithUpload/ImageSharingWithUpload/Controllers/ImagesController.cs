@@ -10,8 +10,9 @@ using Microsoft.AspNetCore.Hosting;
 using ImageSharingWithUpload.Models;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-// TODO add annotations for HTTP actions
+// TODO add annotations for HTTP actions -DONE
 
 namespace ImageSharingWithUpload.Controllers
 {
@@ -27,6 +28,8 @@ namespace ImageSharingWithUpload.Controllers
             hostingEnvironment = environment;
             this.logger = logger;
         }
+
+        #region Internal Functions
 
         protected void mkDirectories()
         {
@@ -73,8 +76,9 @@ namespace ImageSharingWithUpload.Controllers
             }
         }
 
+        #endregion
 
-        // TODO
+        // TODO -DONE
         [HttpGet]
         public IActionResult Upload()
         {
@@ -83,25 +87,27 @@ namespace ImageSharingWithUpload.Controllers
             return View();
         }
 
-        // TODO
+        // TODO -DONE
         [HttpPost]
         public async Task<IActionResult> Upload(Image image,
                                     IFormFile imageFile)
         {
-            CheckAda();
+            ViewBag.anyFileUpload = true;
 
+            CheckAda();
+            
             if (ModelState.IsValid)
             {
-                var userid = Request.Cookies["userid"];
-                if (userid == null)
+                var UserId = Request.Cookies["UserId"];
+                if (UserId == null)
                 {
                     return RedirectToAction("Register", "Account");
                 }
 
-                image.Userid = userid;
+                image.Userid = UserId;
 
                 /*
-                 * Save image information on the server file system.
+                 * Save image information on the server file system.-DONE
                  */
 
                 if (imageFile != null && imageFile.Length > 0)
@@ -110,10 +116,11 @@ namespace ImageSharingWithUpload.Controllers
 
                     String fileName = image.Id;
 
-                    // TODO save image and metadata
+                    // TODO save image and metadata-DONE
                     if (imageFile.ContentType != "image/jpeg")
                     {
-                        // Error on content type; but can be faked!
+
+                        // Error on content type; but can be faked! TODO
                     }
                     else
                     {
@@ -130,19 +137,29 @@ namespace ImageSharingWithUpload.Controllers
                 }
                 else
                 {
-                    ViewBag.Message = "No image file specified!";
+                    ViewBag.anyFileUpload = false;
+                    ViewBag.errorFileUpload = "No image file specified!";
                     return View(image);
                 }
 
             }
             else
             {
+                ViewBag.anyFileUpload = false;
+                ViewBag.errorFileUpload = "Upload an image";
+
+                if (ModelState["DateTaken"].Errors.Count > 0)
+                {
+                    ModelState["DateTaken"].Errors.Clear();
+                    ModelState.AddModelError("DateTaken", "Please Enter Valid Date");
+                }
                 ViewBag.Message = "Please correct the errors in the form!";
                 return View(image);
             }
         }
 
-        // TODO
+        // TODO-DONE
+        [HttpGet]
         public IActionResult Query()
         {
             CheckAda();
@@ -150,13 +167,14 @@ namespace ImageSharingWithUpload.Controllers
             return View();
         }
 
-        // TODO
+        // TODO-DONE
+        [HttpGet]
         public async Task<IActionResult> Details(Image image)
         {
             CheckAda();
 
-            var userid = Request.Cookies["userid"];
-            if (userid == null)
+            var UserId = Request.Cookies["UserId"];
+            if (UserId == null)
             {
                 return RedirectToAction("Register", "Account");
             }

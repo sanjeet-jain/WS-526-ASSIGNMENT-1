@@ -1,10 +1,12 @@
 ﻿@{
     ViewBag.Title = "Upload an Image";
+    bool anyFileUpload = ViewBag.anyFileUpload ?? true;
 }
 
 <h2>@ViewBag.Title</h2>
 
 @model ImageSharingWithUpload.Models.Image
+
 
 <form method="post" asp-action="Upload" asp-controller="Images" enctype="multipart/form-data">
 
@@ -12,22 +14,28 @@
     <legend>Enter Image Information</legend>
     <p>
         Image id: <input asp-for="Id"/>
+       
+        <span asp-validation-for="Id" class="text-danger"></span>
     </p>
     <p>
         Caption: <input asp-for="Caption"/>
+            <span asp-validation-for="Caption" class="text-danger"></span>
     </p>
     <p>
         Description:<br />
         <textarea asp-for="Description">Enter description here.</textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
     </p>
     <p>
         Date taken: <input asp-for="DateTaken"/>
+            <span asp-validation-for="DateTaken" class="text-danger"></span>
     </p>
     <p>
         <input type="file" name="ImageFile" />
+            <span hidden=@anyFileUpload class="text-danger">@ViewBag.errorFileUpload</span>
     </p>
     <p>
-        <input type="submit" value="Upload" />
+        <input type="submit" required value="Upload" />
     </p>
 </fieldset>
 
