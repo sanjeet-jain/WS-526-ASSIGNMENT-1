@@ -11,6 +11,7 @@ using ImageSharingWithUpload.Models;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Diagnostics;
 
 // TODO add annotations for HTTP actions -DONE
 
@@ -65,7 +66,7 @@ namespace ImageSharingWithUpload.Controllers
         protected void CheckAda()
         {
             var cookie = Request.Cookies["ADA"];
-            logger.LogDebug("ADA cookie value: " + cookie);
+            logger.LogInformation("ADA cookie value: " + cookie);
             if (cookie != null && "true".Equals(cookie))
             {
                 ViewBag.isADA = true;
@@ -92,69 +93,94 @@ namespace ImageSharingWithUpload.Controllers
         public async Task<IActionResult> Upload(Image image,
                                     IFormFile imageFile)
         {
-            ViewBag.anyFileUpload = true;
-
-            CheckAda();
-            
-            if (ModelState.IsValid)
+            try
             {
-                var UserId = Request.Cookies["UserId"];
-                if (UserId == null)
+
+
+                ViewBag.anyFileUpload = true;
+
+                CheckAda();
+
+                if (ModelState.IsValid)
                 {
-                    return RedirectToAction("Register", "Account");
-                }
-
-                image.Userid = UserId;
-
-                /*
-                 * Save image information on the server file system.-DONE
-                 */
-
-                if (imageFile != null && imageFile.Length > 0)
-                {
-                    mkDirectories();
-
-                    String fileName = image.Id;
-
-                    // TODO save image and metadata-DONE
-                    if (imageFile.ContentType != "image/jpeg")
+                    var UserId = Request.Cookies["UserId"];
+                    if (UserId == null)
                     {
+                        logger.LogInformation("Unregistered User");
 
-                        // Error on content type; but can be faked! TODO
+                        return RedirectToAction("Register", "Account");
+                    }
+
+                    image.Userid = UserId;
+
+                    /*
+                     * Save image information on the server file system.-DONE
+                     */
+
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        mkDirectories();
+
+                        String fileName = image.Id;
+
+                        // TODO save image and metadata-DONE
+                        if (imageFile.ContentType != "image/jpeg")
+                        {
+
+                            // Error on content type; but can be faked! TODO - DONE
+                            ViewBag.anyFileUpload = false;
+                            ViewBag.errorFileUpload = "Please Upload a JPEG Image File";
+                            logger.LogInformation("Incorrect Image File Type Upload : " + imageFile.ContentType);
+
+                            return View(image);
+                        }
+                        else
+                        {
+                            using (FileStream DestinationStream = SysIOFile.Create(imageDataFile(image.Id)))
+                            {
+                                await imageFile.CopyToAsync(DestinationStream);
+                            }
+                            var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
+                            String jsonData = JsonSerializer.Serialize(image, jsonOptions);
+                            await SysIOFile.WriteAllTextAsync(imageInfoFile(fileName), jsonData);
+                        }
+
+                        return View("Details", image);
                     }
                     else
                     {
-                        using (FileStream DestinationStream = SysIOFile.Create(imageDataFile(image.Id)))
-                        {
-                            await imageFile.CopyToAsync(DestinationStream);
-                        }
-                        var jsonOptions = new JsonSerializerOptions { WriteIndented = true };
-                        String jsonData = JsonSerializer.Serialize(image, jsonOptions);
-                        await SysIOFile.WriteAllTextAsync(imageInfoFile(fileName), jsonData);
+                        ViewBag.anyFileUpload = false;
+                        ViewBag.errorFileUpload = "No image file specified!";
+                        return View(image);
                     }
 
-                    return View("Details", image);
                 }
                 else
                 {
-                    ViewBag.anyFileUpload = false;
-                    ViewBag.errorFileUpload = "No image file specified!";
+
+                    ViewBag.anyFileUpload = "12";
+                    ViewBag.errorFileUpload = "Upload an image";
+
+                    if (ModelState["DateTaken"].Errors.Count > 0)
+                    {
+
+                        ModelState["DateTaken"].Errors.Clear();
+                        ModelState.AddModelError("DateTaken", "Please Enter Valid Date");
+                    }
+                    ViewBag.Message = "Please correct the errors in the form!";
+
+                    foreach (var item in ModelState)
+                    {
+                        if (item.Value.Errors.Count > 0)
+                            logger.LogInformation("Error For : " + item.Key + ", Error Message : " + item.Value.Errors[0].ErrorMessage);
+                    }
                     return View(image);
                 }
-
             }
-            else
+            catch (Exception e)
             {
-                ViewBag.anyFileUpload = false;
-                ViewBag.errorFileUpload = "Upload an image";
-
-                if (ModelState["DateTaken"].Errors.Count > 0)
-                {
-                    ModelState["DateTaken"].Errors.Clear();
-                    ModelState.AddModelError("DateTaken", "Please Enter Valid Date");
-                }
-                ViewBag.Message = "Please correct the errors in the form!";
-                return View(image);
+                logger.LogError(1, e, "Error");
+                return View(new ErrorViewModel { RequestId =null });
             }
         }
 

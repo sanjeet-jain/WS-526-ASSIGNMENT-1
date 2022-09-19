@@ -4,7 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+using NLog;
+using NLog.Web;
+using System;
+
+var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Debug("init main");
+
+try
+{
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 /*
  * Add services to the container.
@@ -21,14 +30,15 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.None;
 });
 
-/*
- * Configure logging to go the console (local testing only!).
- */
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+    /*
+     * Configure logging to go the console (local testing only!). USING NLOG
+     */
+    builder.Logging.ClearProviders();
+    builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+    builder.Host.UseNLog();
 
 
-WebApplication app = builder.Build();
+    WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -61,3 +71,15 @@ app.UseEndpoints(endpoints =>
  * Finally, run the application!
  */
 app.Run();
+}
+catch (Exception exception)
+{
+    // NLog: catch setup errors
+    logger.Error(exception, "Stopped program because of exception");
+    throw;
+}
+finally
+{
+    // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+    NLog.LogManager.Shutdown();
+}

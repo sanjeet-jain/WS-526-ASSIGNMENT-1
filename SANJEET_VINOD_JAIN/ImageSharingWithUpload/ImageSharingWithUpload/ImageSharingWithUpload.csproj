@@ -10,4 +10,8 @@
     <Folder Include="wwwroot\data\info\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.1.4" />
+  </ItemGroup>
+
 </Project>
