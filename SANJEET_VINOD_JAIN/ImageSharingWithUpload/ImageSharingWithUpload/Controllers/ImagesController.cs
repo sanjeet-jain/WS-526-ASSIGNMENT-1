@@ -158,7 +158,7 @@ namespace ImageSharingWithUpload.Controllers
                 else
                 {
 
-                    ViewBag.anyFileUpload = "12";
+                    ViewBag.anyFileUpload = false;
                     ViewBag.errorFileUpload = "Upload an image";
 
                     if (ModelState["DateTaken"].Errors.Count > 0)
